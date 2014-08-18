@@ -48,6 +48,11 @@ mex flsa.c;
 cd([current_path '/MALSAR/c_files/eplb']);
 mex eplb.c;
 
+cd([current_path '/MALSAR/c_files/calibration']);
+mex segADMM_Zstep.c;
+mex segL2.c;
+mex segL2Proj.c;
+mex segSubg_loss.c;
 
 %% Output information
 %% 
