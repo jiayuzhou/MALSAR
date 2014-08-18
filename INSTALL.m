@@ -54,6 +54,10 @@ mex segL2.c;
 mex segL2Proj.c;
 mex segSubg_loss.c;
 
+cd([current_path '/MALSAR/c_files/largescale_ops']);
+mex -O -largeArrayDims sparse_inp.c
+mex -O -largeArrayDims sparse_update.c
+
 %% Output information
 %% 
 fprintf('\n\n The C files in the folder c_files have been successfully mexed.');
