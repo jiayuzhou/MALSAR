@@ -17,5 +17,6 @@ The MALSAR (Multi-tAsk Learning via StructurAl Regularization) package includes 
 - Incomplete Multi-Source Fusion (iMSF)
 - Multi-Stage Multi-Source Fusion
 - Multi-Task Clustering
+- Multi-Task Calibration
 
 If you have any questions regarding MALSAR, please contact Jiayu Zhou at jiayu.zhou@asu.edu.
