@@ -78,7 +78,7 @@ for cv_idx = 1: cv_fold
     
     for p_idx = 1: length(param_range)
         W = obj_func(cv_Xtr, cv_Ytr, param_range(p_idx), obj_func_opts);
-        perform_mat(p_idx) = perform_mat(p_idx) + eval_func(Y, X, W);
+        perform_mat(p_idx) = perform_mat(p_idx) + eval_func(cv_Yte, cv_Xte, W);
     end
 end
 perform_mat = perform_mat./cv_fold;
