@@ -65,7 +65,7 @@ fprintf('Perform model selection via cross validation: \n')
 %disp(perform_mat) % show the performance for each parameter.
 
 % build model using the optimal parameter 
-W = Least_Trace(X_te, Y_te, best_param, opts);
+W = Least_Trace(X_tr, Y_tr, best_param, opts);
 
 % show final performance
 final_performance = eval_MTL_mse(Y_te, X_te, W);
