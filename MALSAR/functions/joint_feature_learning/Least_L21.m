@@ -184,36 +184,9 @@ W = Wzp;
 
 % private functions
 
-    function [Wp] = FGLasso_projection (W, lambda )
-        % solve it in row wise (L_{2,1} is row coupled).
-        % for each row we need to solve the proximal opterator
-        % argmin_w { 0.5 \|w - v\|_2^2 + lambda_3 * \|w\|_2 }
-        
-        Wp = zeros(size(W));
-        
-        if opts.pFlag
-            parfor i = 1 : size(W, 1)
-                v = W(i, :);
-                nm = norm(v, 2);
-                if nm == 0
-                    w = zeros(size(v));
-                else
-                    w = max(nm - lambda, 0)/nm * v;
-                end
-                Wp(i, :) = w';
-            end
-        else
-            for i = 1 : size(W, 1)
-                v = W(i, :);
-                nm = norm(v, 2);
-                if nm == 0
-                    w = zeros(size(v));
-                else
-                    w = max(nm - lambda, 0)/nm * v;
-                end
-                Wp(i, :) = w';
-            end
-        end
+    function [X] = FGLasso_projection (D, lambda )
+    % l2.1 norm projection.
+        X = repmat(max(0, 1 - lambda./sqrt(sum(D.^2,2))),1,size(D,2)).*D;
     end
 
 % smooth part gradient.
