@@ -215,17 +215,13 @@ C = Czp;
 
 % private functions
 
-    function [z l1_comp_val] = l1_projection (v, beta)
+    function [z, l1_comp_val] = l1_projection (v, beta)
         % this projection calculates
         % argmin_z = \|z-v\|_2^2 + beta \|z\|_1
         % z: solution
         % l1_comp_val: value of l1 component (\|z\|_1)
         
-        z = zeros(size(v));
-        vp = v - beta/2;
-        z (v> beta/2)  = vp(v> beta/2);
-        vn = v + beta/2;
-        z (v< -beta/2) = vn(v< -beta/2);
+        z = sign(v).*max(0,abs(v)- beta/2);
         
         l1_comp_val = sum(sum(abs(z)));
     end
@@ -235,15 +231,11 @@ C = Czp;
         grad_W = zeros(dimension, task_num);
         grad_C = zeros(1, task_num);
         lossValVect = zeros (1 , task_num);
-        if opts.pFlag
-            parfor i = 1:task_num
-                [ grad_W(:, i), grad_C(:, i), lossValVect(:, i)] = unit_grad_eval( W(:, i), C(i), X{i}, Y{i});
-            end
-        else
-            for i = 1:task_num
-                [ grad_W(:, i), grad_C(:, i), lossValVect(:, i)] = unit_grad_eval( W(:, i), C(i), X{i}, Y{i});
-            end
+        
+        for i = 1:task_num
+            [ grad_W(:, i), grad_C(:, i), lossValVect(:, i)] = unit_grad_eval( W(:, i), C(i), X{i}, Y{i});
         end
+        
         grad_W = grad_W + rho_L2 * 2 * W;
         % here when computing function value we do not include
         % l1 norm.
@@ -254,15 +246,10 @@ C = Czp;
 
     function [funcVal] = funVal_eval (W, C)
         funcVal = 0;
-        if opts.pFlag
-            parfor i = 1: task_num
-                funcVal = funcVal + unit_funcVal_eval( W(:, i), C(i), X{i}, Y{i});
-            end
-        else
-            for i = 1: task_num
-                funcVal = funcVal + unit_funcVal_eval( W(:, i), C(i), X{i}, Y{i});
-            end
+        for i = 1: task_num
+            funcVal = funcVal + unit_funcVal_eval( W(:, i), C(i), X{i}, Y{i});
         end
+        
         % here when computing function value we do not include
         % l1 norm.
         funcVal = funcVal + rho_L2 * norm(W, 'fro')^2;

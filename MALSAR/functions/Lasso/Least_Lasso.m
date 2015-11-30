@@ -116,7 +116,7 @@ while iter < opts.maxIter
     Fs   = funVal_eval  (Ws);
     
     while true
-        [Wzp l1c_wzp] = l1_projection(Ws - gWs/gamma, 2 * rho1 / gamma);
+        [Wzp, l1c_wzp] = l1_projection(Ws - gWs/gamma, 2 * rho1 / gamma);
         Fzp = funVal_eval  (Wzp);
         
         delta_Wzp = Wzp - Ws;
@@ -181,52 +181,38 @@ W = Wzp;
 
 % private functions
 
-    function [z l1_comp_val] = l1_projection (v, beta)
+    function [z, l1_comp_val] = l1_projection (v, beta)
         % this projection calculates
         % argmin_z = \|z-v\|_2^2 + beta \|z\|_1
         % z: solution
         % l1_comp_val: value of l1 component (\|z\|_1)
-        
-        z = zeros(size(v));
-        vp = v - beta/2;
-        z (v> beta/2)  = vp(v> beta/2);
-        vn = v + beta/2;
-        z (v< -beta/2) = vn(v< -beta/2);
-        
-        
+
+         z = sign(v).*max(0,abs(v)- beta/2);
+         
+% The above shrinkage function performs the following.
+%         z = zeros(size(v));
+%         vp = v - beta/2;
+%         z (v> beta/2)  = vp(v> beta/2);
+%         vn = v + beta/2;
+%         z (v< -beta/2) = vn(v< -beta/2);
+         
         l1_comp_val = sum(sum(abs(z)));
     end
 
     function [grad_W] = gradVal_eval(W)
-        if opts.pFlag
-            grad_W = zeros(size(W));
-            parfor t_ii = 1:task_num
-                XWi = X{t_ii}' * W(:,t_ii);
-                XTXWi = X{t_ii}* XWi;
-                grad_W(:,t_ii) = XTXWi - XY{t_ii};
-            end
-        else
-            grad_W = [];
-            for t_ii = 1:task_num
-                XWi = X{t_ii}' * W(:,t_ii);
-                XTXWi = X{t_ii}* XWi;
-                grad_W = cat(2, grad_W, XTXWi - XY{t_ii});
-            end
+        grad_W = [];
+        for t_ii = 1:task_num
+            XWi = X{t_ii}' * W(:,t_ii);
+            XTXWi = X{t_ii}* XWi;
+            grad_W = cat(2, grad_W, XTXWi - XY{t_ii});
         end
         grad_W = grad_W + rho_L2 * 2 * W;
     end
 
     function [funcVal] = funVal_eval (W)
-        
         funcVal = 0;
-        if opts.pFlag
-            parfor i = 1: task_num
-                funcVal = funcVal + 0.5 * norm (Y{i} - X{i}' * W(:, i))^2;
-            end
-        else
-            for i = 1: task_num
-                funcVal = funcVal + 0.5 * norm (Y{i} - X{i}' * W(:, i))^2;
-            end
+        for i = 1: task_num
+            funcVal = funcVal + 0.5 * norm (Y{i} - X{i}' * W(:, i))^2;
         end
         funcVal = funcVal + rho_L2 * norm(W, 'fro')^2;
     end
