@@ -121,7 +121,7 @@ while iter < opts.maxIter
         
         delta_Wzp = Wzp - Ws;
         r_sum = norm(delta_Wzp, 'fro')^2;
-        Fzp_gamma = Fs + trace(delta_Wzp' * gWs) + gamma/2 * norm(delta_Wzp, 'fro')^2;
+        Fzp_gamma = Fs + sum(sum(delta_Wzp .* gWs)) + gamma/2 * sum(sum(delta_Wzp.*delta_Wzp));
         
         if (r_sum <=1e-20)
             bFlag=1; % this shows that, the gradient step makes little improvement
@@ -186,15 +186,7 @@ W = Wzp;
         % argmin_z = \|z-v\|_2^2 + beta \|z\|_1
         % z: solution
         % l1_comp_val: value of l1 component (\|z\|_1)
-
-         z = sign(v).*max(0,abs(v)- beta/2);
-         
-% The above shrinkage function performs the following.
-%         z = zeros(size(v));
-%         vp = v - beta/2;
-%         z (v> beta/2)  = vp(v> beta/2);
-%         vn = v + beta/2;
-%         z (v< -beta/2) = vn(v< -beta/2);
+        z = sign(v).*max(0,abs(v)- beta/2);
          
         l1_comp_val = sum(sum(abs(z)));
     end
@@ -212,9 +204,10 @@ W = Wzp;
     function [funcVal] = funVal_eval (W)
         funcVal = 0;
         for i = 1: task_num
-            funcVal = funcVal + 0.5 * norm (Y{i} - X{i}' * W(:, i))^2;
+            funcVal = funcVal + 0.5 * norm (Y{i} - X{i}' * W(:, i), 'fro')^2;
         end
         funcVal = funcVal + rho_L2 * norm(W, 'fro')^2;
     end
+
 
 end
