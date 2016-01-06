@@ -1,21 +1,16 @@
-function mse = eval_MTL_mse (Y, X, W)
+function rmse = eval_MTL_rmse (Y, X, W)
 %% FUNCTION eval_MTL_mse
-%   computation of mean squared error given a specific model.
+%   computation of root mean squared error given a specific model.
 %   the value is the lower the better.
 %   
 %% FORMULATION
-%
-%  multi-task mse = sum_t (mse(t) * N_t) / sum_t N_t
+%   
+% multi-task rmse = sum_t (rmse(t) * N_t) / sum_t N_t
 %
 %  where 
-%     mse(t) = sum((Yt_pred - Y{t})^2))/ N_t
+%     rmse(t) = sqrt(sum((Yt_pred - Y{t})^2))/ N_t)
 %     Yt_pred = X{t} * W(:, t)
 %     N_t     = length(Y{t})
-%
-%  which can be simplified as:
-%  
-%  multi-task mse = sum_t sum((Yt_pred - Y{t})^2)) / sum_t N_t
-%  
 %
 %% INPUT
 %   X: {n * d} * t - input matrix
@@ -51,14 +46,13 @@ function mse = eval_MTL_mse (Y, X, W)
 %   Last modified on Jan 6, 2016.
 %
     task_num = length(X);
-    mse = 0;
+    rmse = 0;
     
     total_sample = 0;
     for t = 1: task_num
         y_pred = X{t} * W(:, t);
-        %mse = mse + (sum((y_pred - Y{t}).^2)/length(y_pred)) * length(y_pred);
-        mse = mse + sum((y_pred - Y{t}).^2); % length of y cancelled. 
+        rmse = rmse + sqrt(sum((y_pred - Y{t}).^2)/length(y_pred)) * length(y_pred);
         total_sample = total_sample + length(y_pred);
     end
-    mse = mse/total_sample;
+    rmse = rmse./total_sample;
 end
