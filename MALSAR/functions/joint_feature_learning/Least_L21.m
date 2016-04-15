@@ -71,27 +71,22 @@ task_num  = length (X);
 dimension = size(X{1}, 1);
 funcVal = [];
 
-XY = cell(task_num, 1);
-W0_prep = [];
-for t_idx = 1: task_num
-    XY{t_idx} = X{t_idx}*Y{t_idx};
-    W0_prep = cat(2, W0_prep, XY{t_idx});
-end
-
 % initialize a starting point
-if opts.init==2
+if isfield(opts,'W0')
+    W0=opts.W0;
+    if (nnz(size(W0)-[dimension, task_num]))
+        error('\n Check the input .W0');
+    end
+elseif opts.init==2
     W0 = zeros(dimension, task_num);
 elseif opts.init == 0
-    W0 = W0_prep;
-else
-    if isfield(opts,'W0')
-        W0=opts.W0;
-        if (nnz(size(W0)-[dimension, task_num]))
-            error('\n Check the input .W0');
-        end
-    else
-        W0=W0_prep;
+    XY = cell(task_num, 1);
+    W0_prep = [];
+    for t_idx = 1: task_num
+        XY{t_idx} = X{t_idx}*Y{t_idx};
+        W0_prep = cat(2, W0_prep, XY{t_idx});
     end
+    W0 = W0_prep;
 end
 
 bFlag=0; % this flag tests whether the gradient step only changes a little
@@ -185,7 +180,7 @@ W = Wzp;
 % private functions
 
     function [X] = FGLasso_projection (D, lambda )
-    % l2.1 norm projection.
+        % l2.1 norm projection.
         X = repmat(max(0, 1 - lambda./sqrt(sum(D.^2,2))),1,size(D,2)).*D;
     end
 
