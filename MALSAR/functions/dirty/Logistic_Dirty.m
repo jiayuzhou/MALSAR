@@ -1,4 +1,14 @@
+%Han Cao
+%22.2.2017
+
 function [W, C, P, Q, L, F] = Logistic_Dirty(X, Y, rho1, rho2, opts)
+%W: model parameters
+%C: constant parameters
+%P: shared structure
+%Q: non_shared structure
+%L: objective value for every iteration 
+%F: loss value for every iteration 
+
 
 if nargin <4
     error('\n Inputs: X, Y, rho1, should be specified!\n');
