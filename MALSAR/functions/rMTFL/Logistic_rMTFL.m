@@ -1,8 +1,8 @@
-function [W, C, P, Q, L, F] = Logistic_rMTL(X, Y, rho1, rho2, opts)
+function [W, C, P, Q, L, F] = Logistic_rMTFL(X, Y, rho1, rho2, opts)
 %W: model parameters
 %C: constant parameters
 %P: shared structure
-%Q: non_shared structure
+%Q: indicate the outliers
 %L: objective value for every iteration 
 %F: loss value for every iteration 
 
