@@ -1,6 +1,3 @@
-%Han Cao
-%22.2.2017
-
 function [W, C, P, Q, L, F] = Logistic_Dirty(X, Y, rho1, rho2, opts)
 %W: model parameters
 %C: constant parameters
@@ -186,15 +183,6 @@ C = Czp;
 
 % private functions
 
-    function [Wp] = FGLasso_projection (W, lambda )
-        % solve it in row wise (L_{2,1} is row coupled).
-        % for each row we need to solve the proximal opterator
-        % argmin_w { 0.5 \|w - v\|_2^2 + lambda_3 * \|w\|_2 }
-        Wp = repmat(max(0, 1 - lambda./sqrt(sum(W.^2,2))),1,size(W,2)).*W;
-
-    end
-
-
     function [grad_W, grad_C, funcVal] = gradVal_eval(W, C)
         grad_W = zeros(dimension, task_num);
         grad_C = zeros(1, task_num);
@@ -216,34 +204,6 @@ C = Czp;
         % l1 norm.
     end
 
-    function [non_smooth_value] = nonsmooth_eval(W, rho)
-        non_smooth_value = sum(sqrt(sum(W.^2, 2)))*rho;        
-    end
-
-    function [Xnorm] = L1infnorm(X)
-    % ||X||_{1,2} = sum_i||X^i||_inf
-    Xnorm = sum(max(abs(X),[],2));
-    end
-
-    function [Xnorm] = L11norm(X)
-    % ||X||_tr = sum_i\sigma_i
-    Xnorm = sum(sum(abs(X)));
-    end
-
-    function [X] = proximalL1infnorm(D, tau)
-        % min_X 0.5*||X - D||_F^2 + tau*||X||_{1,inf}
-        % where ||X||_{1,inf} = sum_i||X^i||_inf, where X^i denotes the i-th row of X
-        [m,n]=size(D);
-        [mu,~,~]=prf_lbm(D,m,n,tau);
-        X = D - mu;     
-    end
-
-
-    function [X] = proximalL11norm(D, tau)
-        % min_X 0.5*||X - D||_F^2 + tau*||X||_{1,1}
-        % where ||X||_{1,1} = sum_ij|X_ij|, where X_ij denotes the (i,j)-th entry of X
-        X = sign(D).*max(0,abs(D)-tau);
-    end
 end
 
 function [ grad_w, grad_c, funcVal ] = unit_grad_eval( w, c, x, y)
