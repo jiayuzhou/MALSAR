@@ -1,24 +1,10 @@
-%% FUNCTION Logistic_TGL
-%  L21 Joint Feature Learning with Logistic Loss.
-%
-%% OBJECTIVE
-%   argmin_{W,C} { sum_i^t (- sum(log (1./ (1+ exp(-X{i}*W(:, i) - Y{i} .* C(i)))))/length(Y{i}))
-%            + opts.rho_L2 * \|W\|_2^2 + rho1 * \|W\|_{2,1} }
-%
-%% INPUT
-%   X: {n * d} * t - input matrix
-%   Y: {n * 1} * t - output matrix
-%   rho1: L2,1-norm group Lasso parameter.
-%   OPTIONAL
-%      opts.rho_L2: L2-norm parameter (default = 0).
-%
-%% OUTPUT
-%   W: model: d * t
-%   C: model: 1 * t
-%   funcVal: function value vector.
-%
-%% Code starts here
-function [W, C, P, Q, L, F] = my_Logistic_rMTL(X, Y, rho1, rho2, opts)
+function [W, C, P, Q, L, F] = Logistic_rMTL(X, Y, rho1, rho2, opts)
+%W: model parameters
+%C: constant parameters
+%P: shared structure
+%Q: non_shared structure
+%L: objective value for every iteration 
+%F: loss value for every iteration 
 
 if nargin <4
     error('\n Inputs: X, Y, rho1, should be specified!\n');
@@ -29,10 +15,6 @@ if nargin <5
     opts = [];
 end
 
-
-
-% initialize options.
-%opts=init_opts(opts);
 
 task_num  = length (X);
 dimension = size(X{1}, 1);
@@ -233,59 +215,27 @@ C = Czp;
         non_smooth_value = sum(sqrt(sum(W.^2, 2)))*rho;        
     end
 
-    function [Xnorm] = L1infnorm(X)
-    % ||X||_{1,2} = sum_i||X^i||_inf
-    Xnorm = sum(max(abs(X),[],2));
-    end
-
-    function [Xnorm] = L11norm(X)
-    % ||X||_tr = sum_i\sigma_i
-    Xnorm = sum(sum(abs(X)));
-    end
-
-    function [X] = proximalL1infnorm(D, tau)
-        % min_X 0.5*||X - D||_F^2 + tau*||X||_{1,inf}
-        % where ||X||_{1,inf} = sum_i||X^i||_inf, where X^i denotes the i-th row of X
-        
-        % X = D; n = size(D,2);
-        % for ii = 1:size(D,1)
-        %     [mu,~,~] = prf_lb(D(ii,:)', n, tau);
-        %     X(ii,:) = D(ii,:) - mu';
-        
-        % end
-        
-        [m,n]=size(D);
-        [mu,~,~]=prf_lbm(D,m,n,tau);
-        X = D - mu;     
-    end
-
-
-    function [X] = proximalL11norm(D, tau)
-        % min_X 0.5*||X - D||_F^2 + tau*||X||_{1,1}
-        % where ||X||_{1,1} = sum_ij|X_ij|, where X_ij denotes the (i,j)-th entry of X
-        X = sign(D).*max(0,abs(D)-tau);
-    end
 end
 
 function [ grad_w, grad_c, funcVal ] = unit_grad_eval( w, c, x, y)
-%gradient and logistic evaluation for each task
-m = length(y);
-weight = ones(m, 1)/m;
-weighty = weight.* y;
-aa = -y.*(x'*w + c);
-bb = max( aa, 0);
-funcVal = weight'* ( log( exp(-bb) +  exp(aa-bb) ) + bb );
-pp = 1./ (1+exp(aa));
-b = -weighty.*(1-pp);
-grad_c = sum(b);
-grad_w = x * b;
+    %gradient and logistic evaluation for each task
+    m = length(y);
+    weight = ones(m, 1)/m;
+    weighty = weight.* y;
+    aa = -y.*(x'*w + c);
+    bb = max( aa, 0);
+    funcVal = weight'* ( log( exp(-bb) +  exp(aa-bb) ) + bb );
+    pp = 1./ (1+exp(aa));
+    b = -weighty.*(1-pp);
+    grad_c = sum(b);
+    grad_w = x * b;
 end
 
 function [ funcVal ] = unit_funcVal_eval( w, c, x, y)
-%function value evaluation for each task 
-m = length(y);
-weight = ones(m, 1)/m;
-aa = -y.*(x'*w + c);
-bb = max( aa, 0);
-funcVal = weight'* ( log( exp(-bb) +  exp(aa-bb) ) + bb );
+    %function value evaluation for each task 
+    m = length(y);
+    weight = ones(m, 1)/m;
+    aa = -y.*(x'*w + c);
+    bb = max( aa, 0);
+    funcVal = weight'* ( log( exp(-bb) +  exp(aa-bb) ) + bb );
 end
