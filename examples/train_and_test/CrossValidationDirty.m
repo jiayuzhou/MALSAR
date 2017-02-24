@@ -67,8 +67,6 @@ for cv_idx = 1: cv_fold
             opts = rmfield(opts, 'C0');
         end
         for ii= 1: length(lambda2_range)
-            fprintf('ii=');
-            disp(ii);
             [W C P Q] = obj_func(cv_Xtr, cv_Ytr, lambda1_range(i), lambda2_range(ii), opts);
             opts.init=1;
             opts.P0=P;
