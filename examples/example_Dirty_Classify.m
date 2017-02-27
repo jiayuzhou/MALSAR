@@ -41,8 +41,8 @@ opts.tol = 10^-5;
 opts.maxIter = 60000; 
 
 % lambda range
-lambda1_range = [1:-0.01:0.01];
-lambda2_range = [2:-0.05:0.05];
+lambda1_range = 1:-0.01:0.01;
+lambda2_range = 2:-0.05:0.05;
 
 %container for holding the results
 r_acc=cell(1,3);
@@ -77,20 +77,20 @@ for i = 1: out_cv_fold
     
     %inner cv
     fprintf('inner CV started\n')
-    [best_lambda1 best_lambda2 accuracy_mat] = CrossValidationDirty( Xtr, Ytr, ...
+    [best_lambda1, best_lambda2, accuracy_mat] = CrossValidationDirty( Xtr, Ytr, ...
         'Logistic_Dirty', opts, lambda1_range,lambda2_range, in_cv_fold, ...
         'eval_MTL_accuracy');
     
     %train
     %warm start for one turn
-    [W C P Q L F] = Logistic_Dirty(Xtr, Ytr, best_lambda1, best_lambda2, opts);
+    [W, C, P, Q, funcVal, lossVal] = Logistic_Dirty(Xtr, Ytr, best_lambda1, best_lambda2, opts);
     opts2=opts;
     opts2.init=1;
     opts2.C0=C;
     opts2.P0=P;
     opts2.Q0=Q;
     opts2.tol = 10^-10;
-    [W2 C2 P2 Q2 L2 F2] = Logistic_Dirty(Xtr, Ytr, best_lambda1, best_lambda2, opts2);
+    [W2, C2, P2, Q2, funcVal2, lossVal2] = Logistic_Dirty(Xtr, Ytr, best_lambda1, best_lambda2, opts2);
     
 
      %test

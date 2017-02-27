@@ -1,11 +1,48 @@
-function [W, C, P, Q, L, F] = Logistic_Dirty(X, Y, rho1, rho2, opts)
-%W: model parameters
-%C: constant parameters
-%P: shared structure
-%Q: non_shared structure
-%L: objective value for every iteration 
-%F: loss value for every iteration 
+%% FUNCTION Least_Dirty
+%   Dirty Multi-Task Learning with Least Squares Loss.
+%
+%% INPUT
+%   X: {n * d} * t - input matrix
+%   Y: {n * 1} * t - output matrix
+%   rho1: group sparsity regularization parameter
+%   rho2: elementwise sparsity regularization parameter
+%
+%% OUTPUT
+%   W: model: d * t
+%   C: constant parameters
+%   P: group sparsity structure (joint feature selection)
+%   Q: elementwise sparsity component
+%   funcVal: function (objective) value vector.
+%   lossVal: loss value for every iteration.
+%
+%% LICENSE
+%   This program is free software: you can redistribute it and/or modify
+%   it under the terms of the GNU General Public License as published by
+%   the Free Software Foundation, either version 3 of the License, or
+%   (at your option) any later version.
+%
+%   This program is distributed in the hope that it will be useful,
+%   but WITHOUT ANY WARRANTY; without even the implied warranty of
+%   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+%   GNU General Public License for more details.
+%
+%   You should have received a copy of the GNU General Public License
+%   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+%
+%   Copyright (C) 2011 - 2012 Jiayu Zhou, Pinghua Gong and Jieping Ye 
+%
+%   You are suggested to first read the Manual.
+%   For any problem, please contact with Jiayu Zhou via jiayu.zhou@asu.edu
+%
+%   Last modified on June 3, 2012.
+%
+%% RELATED PAPERS
+%
+%   [1] Jalali, A. and Ravikumar, P. and Sanghavi, S. and Ruan, C. A dirty
+%       model for multi-task learning, NIPS 2010.
+%
 
+function [W, C, P, Q, funcVal, lossVal] = Logistic_Dirty(X, Y, rho1, rho2, opts)
 
 if nargin <4
     error('\n Inputs: X, Y, rho1, should be specified!\n');
@@ -20,8 +57,8 @@ end
 
 task_num  = length (X);
 dimension = size(X{1}, 1);
-L = [];
-F = [];
+funcVal = [];
+lossVal = [];
 
 %initialize a starting point
 C0_prep = zeros(1, task_num);
@@ -141,27 +178,27 @@ while iter < opts.maxIter
     Qz = Qzp;
     Cz = Czp;
     
-    L = cat(1, L, Fzp + rho1*L1infnorm(Pzp) + rho2*L11norm(Qzp));
-    F = cat(1, F, Fzp);
+    funcVal = cat(1, funcVal, Fzp + rho1*L1infnorm(Pzp) + rho2*L11norm(Qzp));
+    lossVal = cat(1, lossVal, Fzp);
 
     
     % test stop condition.
     switch(opts.tFlag)
         case 0
             if iter>=2
-                if (abs( L(end) - L(end-1) ) <= opts.tol)
+                if (abs( funcVal(end) - funcVal(end-1) ) <= opts.tol)
                     break;
                 end
             end
         case 1
             if iter>=2
-                if (abs( L(end) - L(end-1) ) <=...
-                        opts.tol* L(end-1))
+                if (abs( funcVal(end) - funcVal(end-1) ) <=...
+                        opts.tol* funcVal(end-1))
                     break;
                 end
             end
         case 2
-            if ( L(end)<= opts.tol)
+            if ( funcVal(end)<= opts.tol)
                 break;
             end
         case 3
