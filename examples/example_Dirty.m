@@ -62,7 +62,7 @@ opts.maxIter = 500; % maximum iteration number of optimization.
 rho_1 = 350;%   rho1: group sparsity regularization parameter
 rho_2 = 10;%   rho2: elementwise sparsity regularization parameter
 
-[W funcVal P Q] = Least_Dirty(X, Y, rho_1, rho_2, opts);
+[W, funcVal, P, Q] = Least_Dirty(X, Y, rho_1, rho_2, opts);
 
 
 
